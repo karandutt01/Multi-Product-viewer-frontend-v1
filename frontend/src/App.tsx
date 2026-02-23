@@ -1,12 +1,15 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Register from './components/Register';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   return (
-    <div className="App">
-      
-    </div>
+    <>
+      <Register />
+      <ToastContainer />
+    </>
   );
 }
 
