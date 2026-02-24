@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 
-const toaster = (status, message) => {
+const toaster = (status:number, message:string) => {
   if(status == 200 || status == 201){
     toast.success(message , {
       position: "top-right",

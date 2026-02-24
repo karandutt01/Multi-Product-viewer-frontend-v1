@@ -18,8 +18,6 @@ function Register() {
       const response: AxiosResponse = await registerUser(formData);
       if (response.status == 200 || response.status == 201) {
         toaster(response.status, response.data.message || "Registration successful")
-      } else {
-        toaster(response.status, response.data || "Registration failed")
       }
 
     } catch (error: AxiosError | any) {
