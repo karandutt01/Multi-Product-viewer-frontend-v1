@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Register from '../Register';
+import Register from '../register/Register';
 import { registerUser } from '../../service/authService';
 import toaster from '../../util/toaster';
 

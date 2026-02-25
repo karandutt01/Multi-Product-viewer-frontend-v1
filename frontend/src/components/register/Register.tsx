@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { registerUser } from '../service/authService';
-import toaster from "../util/toaster";
-import { IRegisterForm } from '../types/IRegisterForm';
+import { registerUser } from '../../service/authService';
+import toaster from "../../util/toaster";
+import { IRegisterForm } from '../../types/IRegisterForm';
 import { AxiosError, AxiosResponse } from 'axios';
 import './register.scss';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router';
 
 function Register() {
 
@@ -85,7 +86,7 @@ function Register() {
                         required: "Email is required",
                         pattern: {
                           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: "Invalid email address"
+                          message: "Please enter a valid email address"
                         }
                       })
                     }/>
@@ -103,15 +104,16 @@ function Register() {
                       ...register('password', {
                         required: "Password is required",
                         minLength: {
-                          value: 6,
-                          message: "Password must be at least 6 characters long"
+                          value: 8,
+                          message: "Password must be at least 8 characters long"
                         }
                       })
                     }/>
 
                     {errors.password && <div className='text-danger'>{errors.password.message}</div>}
                 </div>
-
+                  
+                <div className='mb-3'>Already have a account? <Link to='/login' className='text-primary'>Login</Link></div>
                 <button type="submit" className="btn btn-dark w-100 registerButton">Register</button>
               </div>
               <div>{errors.root && <div className='text-danger'>{errors.root.message}</div>}</div>
