@@ -4,6 +4,7 @@ import { ILogin } from '../../types/ILogin';
 import { Axios, AxiosError, AxiosResponse } from 'axios';
 import { loginUser } from '../../service/authService';
 import { useAuth } from '../../context/authContext';
+import toaster from '../../util/toaster';
 
 
 
@@ -18,6 +19,7 @@ function Login() {
     try {
       const response = await loginUser(formData)
       if (response && response.data) {
+        toaster(response.status, response.data.message || "Login successful")
         setAuth(response.data);
       }
 

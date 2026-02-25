@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 import router from './routes/AppRoutes';
 import { RouterProvider } from 'react-router';
@@ -14,7 +13,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} />        
     </AuthProvider>
   </React.StrictMode>
 );
