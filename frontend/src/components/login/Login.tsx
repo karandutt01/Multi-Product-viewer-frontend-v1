@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { ILogin } from '../../types/ILogin';
 import { Axios, AxiosError, AxiosResponse } from 'axios';
 import { loginUser } from '../../service/authService';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../../hooks/useAuth';
 import toaster from '../../util/toaster';
 
 
@@ -11,7 +11,7 @@ import toaster from '../../util/toaster';
 
 function Login() {  
 
-  const {setAuth} = useAuth();
+  const authContext = useAuth();
   const { register, formState:{errors}, handleSubmit, setError } = useForm<ILogin>();
 
 
@@ -20,7 +20,7 @@ function Login() {
       const response = await loginUser(formData)
       if (response && response.data) {
         toaster(response.status, response.data.message || "Login successful")
-        setAuth(response.data);
+        authContext?.setAuth(response.data);
       }
 
     } catch (error: AxiosError | any) {
