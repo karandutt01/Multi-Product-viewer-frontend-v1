@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
 import { registerUser } from '../../service/authService';
 import toaster from "../../util/toaster";
-import { IRegisterForm } from '../../types/IRegisterForm';
-import { AxiosError, AxiosResponse } from 'axios';
+import type { IRegisterForm } from '../../types/IRegisterForm';
+import type { AxiosResponse } from 'axios';
 import './register.scss';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
@@ -11,28 +10,30 @@ function Register() {
 
   const {register, formState:{errors}, handleSubmit, setError} = useForm<IRegisterForm>();
 
-
-
   const onFormSubmit = async(formData:IRegisterForm) => {
 
     try {
       const response: AxiosResponse = await registerUser(formData);
-      if (response.status == 200 || response.status == 201) {
+      if (response.status === 200 || response.status === 201) {
         toaster(response.status, response.data.message || "Registration successful")
       }
 
-    } catch (error: AxiosError | any) {
+    } catch (error: unknown) {
 
-      if (error.response?.data && Array.isArray(error.response?.data.details)) {
-        // const errors: any = {};
-        // error.response.data.details.forEach((err: any) => {
-        //   if (!errors[err.field]) {
-        //     errors[err.field] = [];
-        //   }
-        //   errors[err.field].push(err.message);
-        // })
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'An unexpected error occurred';
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { details?: unknown[] } } };
+        if (axiosError.response?.data && Array.isArray(axiosError.response?.data.details)) {
+          setError('root', {
+            message: errorMessage
+          });
+        }
+      } else {
         setError('root', {
-          message:error.message
+          message: errorMessage
         });
       }
     }

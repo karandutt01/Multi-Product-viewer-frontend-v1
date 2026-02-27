@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AuthProvider, useAuth } from '../authContext';
+import { AuthProvider } from '../authContext';
+import { useAuth } from '../../hooks/useAuth';
 
 describe('authContext', () => {
   test('useAuth_throws_when_used_outside_AuthProvider', () => {

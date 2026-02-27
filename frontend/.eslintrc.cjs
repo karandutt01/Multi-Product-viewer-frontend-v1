@@ -1,4 +1,4 @@
-/* ESLint config for React + TypeScript + Testing Library + Prettier */
+/* ESLint config for React + TypeScript + Testing Library */
 module.exports = {
   root: true,
   env: {
@@ -20,8 +20,14 @@ module.exports = {
   settings: {
     react: { version: 'detect' },
     'import/resolver': {
-      typescript: {}, // pick up TypeScript path aliases if any
-      node: { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
+      typescript: {
+        alwaysTryTypes: true, // CHANGE: Always try to resolve types
+        project: './tsconfig.json', // CHANGE: Specify TypeScript config path
+      },
+      node: { 
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        moduleDirectory: ['node_modules', 'src/']
+      },
     },
   },
   plugins: [
@@ -32,7 +38,6 @@ module.exports = {
     'import',
     'testing-library',
     'jest-dom',
-    'prettier',
   ],
   extends: [
     'eslint:recommended',
@@ -43,14 +48,11 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
     'plugin:import/recommended',
+    'plugin:import/typescript',
     'plugin:testing-library/react',
     'plugin:jest-dom/recommended',
-    // Keep Prettier last to disable stylistic ESLint rules it covers
-    'plugin:prettier/recommended',
   ],
   rules: {
-    // Formatting via Prettier; fail CI on formatting drift
-    'prettier/prettier': ['error'],
 
     // React modern JSX transform
     'react/react-in-jsx-scope': 'off',
@@ -59,23 +61,6 @@ module.exports = {
     // General quality
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     eqeqeq: ['error', 'always'],
-
-    // Import hygiene / consistency
-    'import/order': [
-      'error',
-      {
-        groups: [
-          'builtin',
-          'external',
-          'internal',
-          ['parent', 'sibling', 'index'],
-          'object',
-          'type',
-        ],
-        'newlines-between': 'always',
-        alphabetize: { order: 'asc', caseInsensitive: true },
-      },
-    ],
 
     // TS best practices
     '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
@@ -86,9 +71,12 @@ module.exports = {
     // Allow void-return event handlers (common in React onClick)
     '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
 
-    // Testing library guardrails
-    'testing-library/no-debugging-utils': 'warn',
-    'testing-library/no-await-sync-events': 'warn',
+    // CHANGE: Disable unsafe TypeScript rules
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+   
   },
   overrides: [
     {

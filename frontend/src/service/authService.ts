@@ -1,6 +1,6 @@
 import axiosConfig from "./axios";
-import {IRegisterForm} from "../types/IRegisterForm";
-import { ILogin } from "../types/ILogin";
+import type {IRegisterForm} from "../types/IRegisterForm";
+import type { ILogin } from "../types/ILogin";
 
 export const registerUser = async(userData:IRegisterForm) => {
   return await axiosConfig.post('/register', userData);

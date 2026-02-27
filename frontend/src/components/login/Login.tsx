@@ -1,31 +1,41 @@
-import React, { useContext } from 'react'
 import { useForm } from 'react-hook-form';
-import { ILogin } from '../../types/ILogin';
-import { Axios, AxiosError, AxiosResponse } from 'axios';
+import type { ILogin } from '../../types/ILogin';
+import { AxiosError } from 'axios';
 import { loginUser } from '../../service/authService';
 import { useAuth } from '../../hooks/useAuth';
 import toaster from '../../util/toaster';
-
+import { useLocation, useNavigate } from 'react-router-dom';
 
 
 
 function Login() {  
 
-  const authContext = useAuth();
+  const {setAuth} = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { register, formState:{errors}, handleSubmit, setError } = useForm<ILogin>();
+
 
 
   const onLogin = async(formData:ILogin) => {
     try {
       const response = await loginUser(formData)
       if (response && response.data) {
-        toaster(response.status, response.data.message || "Login successful")
-        authContext?.setAuth(response.data);
+        toaster(response.status, response?.data?.message || "Login successful")
+        setAuth(response.data);
+        const from = location?.state?.from?.pathname || "/dashboard";
+        navigate(from);
       }
 
-    } catch (error: AxiosError | any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : error instanceof AxiosError 
+          ? error.message 
+          : 'An unexpected error occurred';
+
       setError('root', {
-        message:error.message
+        message: errorMessage
       })
     }
   }
