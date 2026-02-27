@@ -18,7 +18,7 @@
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.2",
     "react-router": "^7.13.1",
-    "react-router-dom": "^7.13.1",
+    "react-router-dom": "^6.5.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
     "sass": "^1.97.3",
@@ -53,6 +53,8 @@
   },
   "devDependencies": {
     "@testing-library/user-event": "^14.5.2",
+    "@types/babel__core": "^7.20.5",
+    "@types/react-router-dom": "^5.3.3",
     "autoprefixer": "^10.4.16",
     "css-loader": "^6.8.1",
     "eslint": "^8.57.0",

@@ -11,7 +11,11 @@ const config: Config.InitialOptions = {
   },
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+     "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js"
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(react-router-dom)/)"
+  ],
   resetMocks: true,
   clearMocks: true,
 };

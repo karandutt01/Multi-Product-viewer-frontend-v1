@@ -4,18 +4,25 @@ import type { IRegisterForm } from '../../types/IRegisterForm';
 import type { AxiosResponse } from 'axios';
 import './register.scss';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 function Register() {
 
-  const {register, formState:{errors}, handleSubmit, setError} = useForm<IRegisterForm>();
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const {register, formState:{errors}, handleSubmit, setError, reset} = useForm<IRegisterForm>();
 
   const onFormSubmit = async(formData:IRegisterForm) => {
+    if(isLoading) return;
+    setIsLoading(true);
 
     try {
       const response: AxiosResponse = await registerUser(formData);
       if (response.status === 200 || response.status === 201) {
         toaster(response.status, response.data.message || "Registration successful")
+        reset();
+        navigate('/login');
       }
 
     } catch (error: unknown) {
@@ -36,6 +43,8 @@ function Register() {
           message: errorMessage
         });
       }
+    }finally{
+      setIsLoading(false);
     }
   }
 
@@ -54,6 +63,7 @@ function Register() {
                   placeholder='Enter the firstname' 
                   className="form-control" 
                   id="registerFormFirstname" 
+                  disabled={isLoading}
                   {
                     ...register('firstname', {
                       required: "Firstname is required",
@@ -68,6 +78,7 @@ function Register() {
                   placeholder='Enter the lastname' 
                   className="form-control" 
                   id="registerFormLastname" 
+                  disabled={isLoading}
                   {
                     ...register('lastname', {
                       required: "Lastname is required",
@@ -82,6 +93,7 @@ function Register() {
                     placeholder='Enter the email' 
                     className="form-control" 
                     id="registerFormemail" 
+                    disabled={isLoading}
                     {
                       ...register('email', {
                         required: "Email is required",
@@ -101,6 +113,7 @@ function Register() {
                     placeholder='Enter the password' 
                     className="form-control" 
                     id="registerFormPassword" 
+                    disabled={isLoading}
                     {
                       ...register('password', {
                         required: "Password is required",
@@ -115,7 +128,7 @@ function Register() {
                 </div>
                   
                 <div className='mb-3'>Already have a account? <Link to='/login' className='text-primary'>Login</Link></div>
-                <button type="submit" className="btn btn-dark w-100 registerButton">Register</button>
+                <button type="submit" className="btn btn-dark w-100 registerButton" disabled={isLoading}>{isLoading ? 'Registering...' : 'Register'}</button>
               </div>
               <div>{errors.root && <div className='text-danger'>{errors.root.message}</div>}</div>
             </div>
