@@ -23,8 +23,7 @@ function Login() {
       if (response && response.data) {
         toaster(response.status, response?.data?.message || "Login successful")
         setAuth(response.data);
-        const from = location?.state?.from?.pathname || "/dashboard";
-        navigate(from);
+        navigate('/dashboard');
       }
 
     } catch (error: unknown) {

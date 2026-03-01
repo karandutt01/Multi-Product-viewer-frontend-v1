@@ -21,10 +21,10 @@ function Layout({children}: {children: React.ReactNode}) {
     setShow(false);
   }
 
-  const navigationItems = [
+   const navigationItems = [
      {
       label: "Dashboard",
-      icon: "bi bi-boxes",
+      icon: "bi bi-columns-gap",
       route: "/dashboard"
     },
     {

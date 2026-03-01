@@ -9,3 +9,7 @@ export const registerUser = async(userData:IRegisterForm) => {
 export const loginUser = async(credentials:ILogin) => {
   return await axiosConfig.post('/login', credentials);
 }
+
+export const addProduct = async(productData:any) => {
+  return await axiosConfig.post('/products/add-product', productData)
+}
