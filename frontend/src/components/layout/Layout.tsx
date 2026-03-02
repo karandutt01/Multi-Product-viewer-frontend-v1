@@ -27,11 +27,6 @@ function Layout({children}: {children: React.ReactNode}) {
       icon: "bi bi-columns-gap",
       route: "/dashboard"
     },
-    {
-      label: "Products",
-      icon: "bi bi-boxes",
-      route: "/products"
-    },
   ]
 
   return (
