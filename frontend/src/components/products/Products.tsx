@@ -1,6 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 function Products() {
+  const [products, setProducts] = useState();
+
+  
+
   return (
     <div>Products</div>
   )

@@ -10,6 +10,14 @@ export const loginUser = async(credentials:ILogin) => {
   return await axiosConfig.post('/login', credentials);
 }
 
-export const addProduct = async(productData:any) => {
-  return await axiosConfig.post('/products/add-product', productData)
+export const addProduct = async(productData:FormData) => {
+  return await axiosConfig.post('/products/add-product', productData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const productList = async() => {
+  return await axiosConfig.get(`/products/product-list`)
 }
