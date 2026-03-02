@@ -1,13 +1,13 @@
 import { AxiosError } from 'axios';
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from 'service/authService';
 import { IProductResponse } from 'types/IProductResponse';
 
 function Products() {
 
   const { id } = useParams<{id:string}>()
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [product, setProduct] = useState<IProductResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,6 +15,7 @@ function Products() {
 
   useEffect(() => {
     if (id) {
+      console.log('id', id)
       fetchProductDetails(id);
     }
   },[id])
@@ -23,8 +24,10 @@ function Products() {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('asdasdasd')
       const response = await getProductById(id);
-      setProduct(response.data?.doc || null);
+      console.log("repsonse products", response)
+      setProduct(response.data || null);
     } catch (error) {
       const errorMessage = error instanceof AxiosError 
         ? error.response?.data?.message || error.message 
@@ -90,7 +93,7 @@ function Products() {
         <div className="col-12">
           <div className="d-flex align-items-center mb-4">
             <button 
-              className="btn btn-outline-secondary me-3" 
+              className="btn btn-outline-light me-3" 
               onClick={handleBackToDashboard}
             >
               <i className="bi bi-arrow-left me-2"></i>
@@ -116,8 +119,15 @@ function Products() {
             <div className="col-md-6">
               <div className="card h-100">
                 <div className="card-body">
-                  <h2 className="card-title">{product.title}</h2>
-                  <h3 className="text-primary mb-3">${product.price}</h3>
+                  <div className="mb-3">
+                    <h5>Product Title</h5>
+                    <h2 className="card-title">{product.title}</h2>
+                  </div>
+
+                   <div className="mb-3">
+                    <h5>Product price</h5>
+                    <h3 className="text-primary mb-3">${product.price}</h3>
+                  </div>
                   
                   <div className="mb-4">
                     <h5>Description</h5>
@@ -130,16 +140,6 @@ function Products() {
                     </small>
                   </div>
 
-                  <div className="d-flex gap-2">
-                    <button className="btn btn-primary">
-                      <i className="bi bi-pencil me-2"></i>
-                      Edit Product
-                    </button>
-                    <button className="btn btn-outline-danger">
-                      <i className="bi bi-trash me-2"></i>
-                      Delete Product
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>

@@ -25,7 +25,6 @@ function Dashboard() {
   const fetchProducts = async () => {
     try {
       const response = await productList();
-      console.log(response)
       setProducts(response.data?.doc || [])
 
     } catch (error) {
@@ -54,6 +53,7 @@ function Dashboard() {
       if (response && response.data) {
         toaster(response.status, response?.data?.message || "Product Added Successfully")
         handleCloseModal()
+        fetchProducts();
       }
 
     } catch (error) {
@@ -111,6 +111,7 @@ function Dashboard() {
   }
 
   const onProductClick = (product: IProductResponse) => {
+    console.log('prodyucts', product)
     navigate(`/products/${product.id}`);
   }
 
