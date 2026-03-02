@@ -7,9 +7,11 @@ import toaster from "util/toaster";
 import { AxiosError } from "axios";
 import { IProduct } from "../../types/IProduct";
 import { IProductResponse } from "../../types/IProductResponse";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
 
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { register, formState: { errors }, handleSubmit, setError, reset } = useForm<IProduct>()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -108,6 +110,10 @@ function Dashboard() {
     reset();
   }
 
+  const onProductClick = (product: IProductResponse) => {
+    navigate(`/products/${product.id}`);
+  }
+
 
   const renderEmptyState = () => (
     <div className="text-center py-5">
@@ -145,13 +151,12 @@ function Dashboard() {
       <div className="row">
         {products?.map((product:IProductResponse) => (
           <div key={product.id} className="col-12 col-md-6 col-lg-4 mb-4">
-            <div className="card h-100 shadow-sm">
+            <div className="card h-100 shadow-sm" onClick={() => onProductClick(product)}>
               {product.imageUrl && (
                 <img 
                   src={product.imageUrl} 
-                  className="card-img-top" 
+                  className="card-img-top imgWidthHeight" 
                   alt={product.title}
-                  style={{ height: '200px', objectFit: 'cover' }}
                 />
               )}
               <div className="card-body d-flex flex-column">

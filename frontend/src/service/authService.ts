@@ -21,3 +21,7 @@ export const addProduct = async(productData:FormData) => {
 export const productList = async() => {
   return await axiosConfig.get(`/products/product-list`)
 }
+
+export const getProductById = async (id:string) => {
+  return await axiosConfig.get(`/products/${id}`)
+}

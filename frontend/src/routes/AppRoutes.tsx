@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     )
   },
   {
-    path:'/products',
+    path:'/products/:id',
     element: (
       <ProtectedRoute>
         <Layout>
