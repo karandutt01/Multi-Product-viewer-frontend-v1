@@ -5,7 +5,11 @@ import { loginUser } from '../../service/authService';
 import { useAuth } from '../../hooks/useAuth';
 import toaster from '../../util/toaster';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import { LOGIN_CONSTANTS, LOGIN_FORM_FIELDS } from '../../constants/loginConstants';
+import LoadingButton from 'components/shared/LoadingButton';
+import ApiError from 'components/shared/ApiError';
+import { useState } from 'react';
+import { parsedError } from 'util/errorHandler';
 
 
 function Login() {  
@@ -13,29 +17,25 @@ function Login() {
   const {setAuth} = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { register, formState:{errors}, handleSubmit, setError } = useForm<ILogin>();
-
+  const { register, formState:{errors, isSubmitting}, handleSubmit, setError } = useForm<ILogin>();
+  const [apiError, setApiError] = useState<string | undefined>(undefined);
 
 
   const onLogin = async(formData:ILogin) => {
     try {
       const response = await loginUser(formData)
       if (response && response.data) {
-        toaster(response.status, response?.data?.message || "Login successful")
+        toaster(response.status, response?.data?.message || LOGIN_CONSTANTS.SUCCESS.LOGIN_DEFAULT)
         setAuth(response.data);
-        navigate('/dashboard');
+        navigate(LOGIN_CONSTANTS.ROUTES.DASHBOARD);
       }
 
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : error instanceof AxiosError 
-          ? error.message 
-          : 'An unexpected error occurred';
-
-      setError('root', {
-        message: errorMessage
-      })
+      setApiError(undefined);
+      const parsed = parsedError(error)
+      if(parsed && parsed.message){
+        setApiError(parsed.message);
+      }
     }
   }
 
@@ -43,54 +43,51 @@ function Login() {
     <div className='container-fluid min-vh-100 d-flex justify-content-center align-items-center'>
       <div className="col-12 col-sm-8 col-md-6 col-lg-4">
         <div>
+          <div className='mb-3'>
+            <ApiError message={apiError}/>
+          </div>
           <form onSubmit={handleSubmit(onLogin)}>
             <div className="card p-3 dark-card">
-              <h1 className="card-title fw-bold text-center fs-4">Sign in with email</h1>
+              <h1 className="card-title fw-bold text-center fs-4">{LOGIN_CONSTANTS.LABELS.TITLE}</h1>
               <div className="card-body">
                 <div className="mb-3">
-                  <label htmlFor="loginFormEmail" className="form-label">Email</label>
+                  <label htmlFor={LOGIN_FORM_FIELDS.email.id} className="form-label">{LOGIN_FORM_FIELDS.email.label}</label>
                   <input 
-                  placeholder='Enter the email' 
+                  placeholder={LOGIN_FORM_FIELDS.email.placeholder}
                   className="form-control" 
-                  id="loginFormEmail" 
+                  id={LOGIN_FORM_FIELDS.email.id} 
                   {
-                    ...register('email', {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Please enter a valid email address"
-                      }
-                    })
+                    ...register('email', LOGIN_FORM_FIELDS.email.validation)
                   }/>
                   {errors.email && <div className='text-danger'>{errors.email.message}</div>}
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="loginFormPassword" className="form-label">Password</label>
+                  <label htmlFor={LOGIN_FORM_FIELDS.password.id} className="form-label">{LOGIN_FORM_FIELDS.password.label}</label>
                   <input 
-                  placeholder='Enter the password' 
+                  type='password'
+                  placeholder={LOGIN_FORM_FIELDS.password.placeholder}
                   className="form-control" 
-                  id="loginFormPassword" 
+                  id={LOGIN_FORM_FIELDS.password.id} 
                   {
-                    ...register('password', {
-                      required: "Password is required",
-                      minLength: { 
-                        value: 8,
-                        message: "Password must be at least 8 characters long"
-                      }
-                    })
+                    ...register('password', LOGIN_FORM_FIELDS.password.validation)
                   }/>
                   {errors.password && <div className='text-danger'>{errors.password.message}</div>}
                 </div>
 
                 <div>
-                  <button type="submit" className="btn btn-dark w-100 registerButton">Sign In</button>
+                  <LoadingButton
+                    type="submit"
+                    isLoading={isSubmitting}
+                    className="btn btn-dark w-100 registerButton"
+                    >
+                    {LOGIN_CONSTANTS.LABELS.SUBMIT_BUTTON}
+                  </LoadingButton>
                 </div>
               </div>
             </div>
           </form>
 
-          <div>{ errors.root && <div className='text-danger'>{errors.root.message}</div>}</div>
         </div>
       </div>
     </div>

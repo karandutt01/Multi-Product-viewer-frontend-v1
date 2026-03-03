@@ -5,7 +5,7 @@ function Modal({children, isOpen=false, onClose}:ModalProps) {
   if(!isOpen) return null;
 
   const handleClose = () => {
-    onClose?.();
+    onClose
   };
 
   return (

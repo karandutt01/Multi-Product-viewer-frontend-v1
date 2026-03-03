@@ -6,45 +6,38 @@ import './register.scss';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { REGISTER_CONSTANTS, REGISTER_FORM_FIELDS } from '../../constants/registerConstants';
+import { parsedError } from 'util/errorHandler';
+import LoadingButton from 'components/shared/LoadingButton';
+import ApiError from 'components/shared/ApiError';
+
 
 function Register() {
 
-  const [isLoading, setIsLoading] = useState(false)
+      
+  const [apiError, setApiError] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
-  const {register, formState:{errors}, handleSubmit, setError, reset} = useForm<IRegisterForm>();
+  const {register, formState:{errors, isSubmitting}, handleSubmit, setError, reset} = useForm<IRegisterForm>();
 
   const onFormSubmit = async(formData:IRegisterForm) => {
-    if(isLoading) return;
-    setIsLoading(true);
 
     try {
       const response: AxiosResponse = await registerUser(formData);
       if (response.status === 200 || response.status === 201) {
-        toaster(response.status, response.data.message || "Registration successful")
+        toaster(response.status, response.data.message || REGISTER_CONSTANTS.SUCCESS.REGISTRATION_DEFAULT)
         reset();
         navigate('/login');
       }
 
     } catch (error: unknown) {
 
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'An unexpected error occurred';
+      setApiError(undefined);
+      const parsed = parsedError(error);
 
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { details?: unknown[] } } };
-        if (axiosError.response?.data && Array.isArray(axiosError.response?.data.details)) {
-          setError('root', {
-            message: errorMessage
-          });
-        }
-      } else {
-        setError('root', {
-          message: errorMessage
-        });
+      // Global error
+      if (parsed && parsed.message) {
+        setApiError(parsed.message);
       }
-    }finally{
-      setIsLoading(false);
     }
   }
 
@@ -53,84 +46,77 @@ function Register() {
     <div className='container-fluid min-vh-100 d-flex justify-content-center align-items-center'>
       <div className="col-12 col-sm-8 col-md-6 col-lg-4">
         <div>
+          <div className='mb-3'>
+            <ApiError message={apiError}/>
+          </div>
           <form onSubmit={handleSubmit(onFormSubmit)}>
             <div className="card p-3 dark-card">
-              <h1 className="card-title fw-bold text-center fs-4">Create an account</h1>
+              <h1 className="card-title fw-bold text-center fs-4">{REGISTER_CONSTANTS.LABELS.TITLE}</h1>
               <div className="card-body">
                 <div className="mb-3">
-                  <label htmlFor="registerFormFirstname" className="form-label">Firstname</label>
+                  <label htmlFor={REGISTER_FORM_FIELDS.firstname.id} className="form-label">{REGISTER_FORM_FIELDS.firstname.label}</label>
                   <input 
-                  placeholder='Enter the firstname' 
+                  placeholder={REGISTER_FORM_FIELDS.firstname.placeholder}
                   className="form-control" 
-                  id="registerFormFirstname" 
-                  disabled={isLoading}
+                  id={REGISTER_FORM_FIELDS.firstname.id} 
+                  disabled={isSubmitting}
                   {
-                    ...register('firstname', {
-                      required: "Firstname is required",
-                    })
+                    ...register('firstname', REGISTER_FORM_FIELDS.firstname.validation)
                   }/>
                   {errors.firstname && <div className='text-danger'>{errors.firstname.message}</div>}
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="registerFormLastname" className="form-label">Lastname</label>
+                  <label htmlFor={REGISTER_FORM_FIELDS.lastname.id} className="form-label">{REGISTER_FORM_FIELDS.lastname.label}</label>
                   <input 
-                  placeholder='Enter the lastname' 
+                  placeholder={REGISTER_FORM_FIELDS.lastname.placeholder}
                   className="form-control" 
-                  id="registerFormLastname" 
-                  disabled={isLoading}
+                  id={REGISTER_FORM_FIELDS.lastname.id} 
+                  disabled={isSubmitting}
                   {
-                    ...register('lastname', {
-                      required: "Lastname is required",
-                    })
+                    ...register('lastname', REGISTER_FORM_FIELDS.lastname.validation)
                   }/>
                   {errors.lastname && <div className='text-danger'>{errors.lastname.message}</div>}
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="registerFormemail" className="form-label">Email</label>
+                  <label htmlFor={REGISTER_FORM_FIELDS.email.id} className="form-label">{REGISTER_FORM_FIELDS.email.label}</label>
                   <input 
-                    placeholder='Enter the email' 
+                    placeholder={REGISTER_FORM_FIELDS.email.placeholder}
                     className="form-control" 
-                    id="registerFormemail" 
-                    disabled={isLoading}
+                    id={REGISTER_FORM_FIELDS.email.id} 
+                    disabled={isSubmitting}
                     {
-                      ...register('email', {
-                        required: "Email is required",
-                        pattern: {
-                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: "Please enter a valid email address"
-                        }
-                      })
+                      ...register('email', REGISTER_FORM_FIELDS.email.validation)
                     }/>
 
                     {errors.email && <div className='text-danger'>{errors.email.message}</div>}
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="registerFormPassword" className="form-label">Password</label>
+                  <label htmlFor={REGISTER_FORM_FIELDS.password.id} className="form-label"> {REGISTER_FORM_FIELDS.password.label}</label>
                   <input 
-                    placeholder='Enter the password' 
+                    type='password'
+                    placeholder={REGISTER_FORM_FIELDS.password.placeholder}
                     className="form-control" 
-                    id="registerFormPassword" 
-                    disabled={isLoading}
+                    id={REGISTER_FORM_FIELDS.password.id} 
+                    disabled={isSubmitting}
                     {
-                      ...register('password', {
-                        required: "Password is required",
-                        minLength: {
-                          value: 8,
-                          message: "Password must be at least 8 characters long"
-                        }
-                      })
+                      ...register('password', REGISTER_FORM_FIELDS.password.validation)
                     }/>
 
                     {errors.password && <div className='text-danger'>{errors.password.message}</div>}
                 </div>
                   
                 <div className='mb-3'>Already have a account? <Link to='/login' className='text-primary'>Login</Link></div>
-                <button type="submit" className="btn btn-dark w-100 registerButton" disabled={isLoading}>{isLoading ? 'Registering...' : 'Register'}</button>
+                <LoadingButton
+                  type="submit"
+                  isLoading={isSubmitting}
+                  className="btn btn-dark w-100 registerButton"
+                >
+                  {REGISTER_CONSTANTS.LABELS.SUBMIT_BUTTON}
+                </LoadingButton>
               </div>
-              <div>{errors.root && <div className='text-danger'>{errors.root.message}</div>}</div>
             </div>
           </form>
         </div>

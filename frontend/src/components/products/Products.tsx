@@ -3,38 +3,37 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from 'service/authService';
 import { IProductResponse } from 'types/IProductResponse';
+import { parsedError } from 'util/errorHandler';
 
 function Products() {
 
   const { id } = useParams<{id:string}>()
   const navigate = useNavigate()
   const [product, setProduct] = useState<IProductResponse | null>(null);
+  const [apiError, setApiError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
 
   useEffect(() => {
     if (id) {
-      console.log('id', id)
       fetchProductDetails(id);
     }
   },[id])
 
   async function fetchProductDetails(id:string){
     try {
-      setIsLoading(true);
-      setError(null);
-      console.log('asdasdasd')
       const response = await getProductById(id);
-      console.log("repsonse products", response)
       setProduct(response.data || null);
+
     } catch (error) {
-      const errorMessage = error instanceof AxiosError 
-        ? error.response?.data?.message || error.message 
-        : 'Failed to fetch product details';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+
+      setApiError(undefined);
+      const parsed = parsedError(error);
+      if(parsed.message){
+        setApiError(parsed.message)
+      }
+      
     }
   };
 

@@ -1,22 +1,27 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import './dashboard.scss'
 import Modal from "components/shared/Modal";
 import { useForm } from "react-hook-form";
 import { addProduct, productList } from "service/authService";
 import toaster from "util/toaster";
 import { AxiosError } from "axios";
-import { IProduct } from "../../types/IProduct";
-import { IProductResponse } from "../../types/IProductResponse";
+import type { IProduct } from "../../types/IProduct";
+import type { IProductResponse } from "../../types/IProductResponse";
 import { useNavigate } from "react-router-dom";
+import { DASHBOARD_CONSTANTS } from "../../constants/dashboardConstants";
+import LoadingButton from "../../components/shared/LoadingButton";
+import ApiError from "../../components/shared/ApiError";
+import { parsedError } from "util/errorHandler";
+
 
 function Dashboard() {
 
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { register, formState: { errors }, handleSubmit, setError, reset } = useForm<IProduct>()
+  const { register, formState: { errors, isSubmitting }, clearErrors, handleSubmit, setError, reset } = useForm<IProduct>()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [products, setProducts] = useState<IProductResponse[]>([])
-  const [productsError, setProductsError] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     fetchProducts();
@@ -28,11 +33,12 @@ function Dashboard() {
       setProducts(response.data?.doc || [])
 
     } catch (error) {
-      const errorMessage = error instanceof AxiosError 
-        ? error.response?.data?.message || error.message 
-        : 'Failed to fetch products';
-      setProductsError(errorMessage);
-
+      
+      setApiError(undefined);
+      const parsed =  parsedError(error)
+      if(parsed.message){
+        setApiError(parsed.message)
+      }
     }
   }
 
@@ -51,53 +57,43 @@ function Dashboard() {
 
       const response = await addProduct(uploadData)
       if (response && response.data) {
-        toaster(response.status, response?.data?.message || "Product Added Successfully")
+        toaster(response.status, response?.data?.message || DASHBOARD_CONSTANTS.MESSAGES.SUCCESS)
         handleCloseModal()
         fetchProducts();
       }
 
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : error instanceof AxiosError 
-          ? (error as AxiosError).message 
-          : 'An unexpected error occurred';
-
-      setError('root', {
-        message: typeof errorMessage === 'string' ? errorMessage : 'An unexpected error occurred'
-      })
+      setApiError(undefined);
+      const parsed =  parsedError(error)
+      if(parsed.message){
+        setApiError(parsed.message)
+      }
     }
   }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
+
+    clearErrors('file');
+    
     if (file) {
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-      if (!allowedTypes.includes(file.type)) {
+      if (!DASHBOARD_CONSTANTS.CONFIG.FILE_UPLOAD.ALLOWED_TYPES.includes(file.type)) {
         setError('file', {
-          message: 'Please select a valid image file (JPEG, PNG, GIF, WebP)'
+          message: DASHBOARD_CONSTANTS.MESSAGES.ERROR.INVALID_FILE_TYPE
         })
         return
       }
 
       // Validate file size (5MB limit)
-      const maxSize = 5 * 1024 * 1024 // 5MB in bytes
-      if (file.size > maxSize) {
+      if (file.size > DASHBOARD_CONSTANTS.CONFIG.FILE_UPLOAD.MAX_SIZE) {
         setError('file', {
-          message: 'File size must be less than 5MB'
+          message: DASHBOARD_CONSTANTS.MESSAGES.ERROR.FILE_SIZE_LIMIT
         })
         return
       }
 
       setSelectedFile(file)
-      
-      // Create preview for images
-      // const reader = new FileReader()
-      // reader.onload = (e) => {
-      //   setFilePreview(e.target?.result as string)
-      // }
-      // reader.readAsDataURL(file)
     }
   }
 
@@ -111,9 +107,16 @@ function Dashboard() {
   }
 
   const onProductClick = (product: IProductResponse) => {
-    console.log('prodyucts', product)
-    navigate(`/products/${product.id}`);
+    navigate(`${DASHBOARD_CONSTANTS.ROUTES.PRODUCTS}/${product.id}`);
   }
+
+  const handleProductKeyDown = (event: React.KeyboardEvent, product: IProductResponse) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onProductClick(product);
+    }
+  }
+
 
 
   const renderEmptyState = () => (
@@ -121,16 +124,16 @@ function Dashboard() {
       <div className="mb-4">
         <i className="bi bi-box-seam display-1 text-muted"></i>
       </div>
-      <h4 className="text-muted mb-3">Start building your product catalog</h4>
+      <h4 className="text-muted mb-3">{DASHBOARD_CONSTANTS.MESSAGES.EMPTY_STATE.TITLE}</h4>
       <p className="text-muted mb-4">
-        {`You haven't added any products yet. Create your first product to get started.`}
+        {DASHBOARD_CONSTANTS.MESSAGES.EMPTY_STATE.DESCRIPTION}
       </p>
       <button
         className="btn btn-primary btn-lg"
         onClick={handleModal}
       >
         <i className="bi bi-plus-circle me-2"></i>
-        Add Your First Product
+        {DASHBOARD_CONSTANTS.LABELS.ADD_YOUR_FIRST_PRODUCT}
       </button>
     </div>
   );
@@ -139,20 +142,26 @@ function Dashboard() {
   const renderProductsList = () => (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="h4 mb-0">Your Products ({products.length})</h2>
+        <h2 className="h4 mb-0">{DASHBOARD_CONSTANTS.LABELS.YOUR_PRODUCTS} ({products.length})</h2>
         <button
           className="btn btn-primary"
           onClick={handleModal}
         >
           <i className="bi bi-plus-circle me-2"></i>
-          Add Product
+          {DASHBOARD_CONSTANTS.LABELS.ADD_PRODUCT}
         </button>
       </div>
 
       <div className="row">
         {products?.map((product:IProductResponse) => (
           <div key={product.id} className="col-12 col-md-6 col-lg-4 mb-4">
-            <div className="card h-100 shadow-sm" onClick={() => onProductClick(product)}>
+            <div className="card h-100 shadow-sm" 
+                onClick={() => onProductClick(product)}
+                onKeyDown={(event) => handleProductKeyDown(event, product)}
+                tabIndex={0}
+                role="button"
+                aria-label={`View details for ${product.title}`}
+              >
               {product.imageUrl && (
                 <img 
                   src={product.imageUrl} 
@@ -178,23 +187,26 @@ function Dashboard() {
 
   return (
 
-
-
     <div>
       <div className="container-fluid py-4">
         <div className="row">
           <div className="col-12">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h1 className="h3 mb-0">Dashboard</h1>
+              <h1 className="h3 mb-0">{DASHBOARD_CONSTANTS.LABELS.TITLE}</h1>
             </div>
 
             {
               products.length === 0 ? renderEmptyState() : renderProductsList()
             }
 
+            <div className='mb-3'>
+              <ApiError message={apiError}/>
+            </div>
+              
+
             <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
               <Modal.Header>
-                Add product
+                {DASHBOARD_CONSTANTS.LABELS.ADD_PRODUCT}
               </Modal.Header>
 
               <Modal.Body>
@@ -202,77 +214,83 @@ function Dashboard() {
                   <div className="p-3 dark-card">
                     <div>
                       <div className="mb-3">
-                        <label htmlFor="productForm" className="form-label">Product Title</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.title.id} className="form-label">{DASHBOARD_CONSTANTS.LABELS.PRODUCT_TITLE}</label>
                         <input
-                          placeholder='Enter product title'
+                          placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.PRODUCT_TITLE}
                           className="form-control"
-                          id="productForm"
+                          id={DASHBOARD_CONSTANTS.FORM_FIELDS.title.id}
                           {
-                          ...register('title', {
-                            required: "Title is required",
-                          })
+                          ...register('title', DASHBOARD_CONSTANTS.VALIDATION.TITLE)
                           } />
                         {errors.title && <div className='text-danger'>{errors.title.message}</div>}
                       </div>
 
                        <div className="mb-3">
-                        <label htmlFor="productForm" className="form-label">Price</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.price.id} className="form-label">Price</label>
                         <input
-                          placeholder='Enter price'
+                          placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.PRICE}
                           className="form-control"
-                          id="productForm"
+                          id={DASHBOARD_CONSTANTS.FORM_FIELDS.price.id}
                           {
-                          ...register('price', {
-                            required: "Price is required",
-                          })
+                          ...register('price', DASHBOARD_CONSTANTS.VALIDATION.PRICE)
                           } />
                         {errors.price && <div className='text-danger'>{errors.price.message}</div>}
                       </div>
 
                       <div className="mb-3">
-                        <label htmlFor="productForm" className="form-label">Product Description</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.description.id} className="form-label">Product Description</label>
                         <input
-                          placeholder='Enter product description'
+                          placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.DESCRIPTION}
                           className="form-control"
-                          id="productForm"
+                          id={DASHBOARD_CONSTANTS.FORM_FIELDS.description.id}
                           {
-                          ...register('description', {
-                            required: "Description is required",
-                          })
+                          ...register('description', DASHBOARD_CONSTANTS.VALIDATION.DESCRIPTION)
                           } />
                         {errors.description && <div className='text-danger'>{errors.description.message}</div>}
                       </div>
 
                       <div className="mb-3">
-                        <label htmlFor="productForm" className="form-label">Upload file</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.file.id} className="form-label">Upload file</label>
                         <input
                           type="file"
-                          placeholder='Browse file'
+                          placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.FILE}
                           className="form-control"
-                          id="productForm"
+                          id={DASHBOARD_CONSTANTS.FORM_FIELDS.file.id}
                           {
                           ...register('file', {
-                            required: "File is required",
+                            ...DASHBOARD_CONSTANTS.VALIDATION.FILE,
                             onChange: handleFileChange
                           })
                           } />
                         {errors.file && <div className='text-danger'>{errors.file.message}</div>}
                       </div>
                     </div>
-                    
                   </div>
                 </form>
               </Modal.Body>
 
               <Modal.Footer>
-                <button className="btn btn-dark" onClick={handleSubmit(addProductHandler)}>Add</button>
-                <button className="btn btn-light" onClick={handleCloseModal}>Cancel</button>
+                <LoadingButton
+                  isLoading={isSubmitting}
+                  className="btn btn-dark"
+                  onClick={handleSubmit(addProductHandler)}
+                >
+                {DASHBOARD_CONSTANTS.LABELS.ADD_BUTTON}
+                </LoadingButton>
+
+                 <LoadingButton
+                  isLoading={false}
+                  className="btn btn-secondary"
+                  onClick={handleCloseModal}
+                >
+                  {DASHBOARD_CONSTANTS.LABELS.CANCEL_BUTTON}
+                </LoadingButton>
+               
               </Modal.Footer>
             </Modal>
           </div>
         </div>
       </div>
-      {/* <SharedOffCanvas /> */}
     </div>
   )
 }

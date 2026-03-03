@@ -2,33 +2,50 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Login from '../login/Login';
+import { loginUser } from '../../service/authService';
+import toaster from '../../util/toaster';
+import { BrowserRouter } from 'react-router-dom';
+import {useAuth} from '../../hooks/useAuth';
+
 
 jest.mock('../../service/authService', () => ({
   loginUser: jest.fn(),
 }));
+
 jest.mock('../../util/toaster', () => jest.fn());
 
-jest.mock('../../context/authContext', () => {
-  const setAuthMock = jest.fn();
-  return {
-    __esModule: true,
-    useAuth: () => ({ setAuth: setAuthMock }),
-    setAuthMock, // exported only from the mock for assertions
-  };
-});
+jest.mock('../../hooks/useAuth', () => ({
+  useAuth: jest.fn(),
+}));
 
-import { loginUser } from '../../service/authService';
-import toaster from '../../util/toaster';
-
-const { setAuthMock } = jest.requireMock('../../context/authContext') as {
-  setAuthMock: jest.Mock;
-};
-
+const mockLoginUser = loginUser as jest.MockedFunction<typeof loginUser>;
+const mockToaster = toaster as jest.MockedFunction<typeof toaster>;
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+  
 describe('Login component', () => {
+ const mockSetAuth = jest.fn();
+  const mockIsAuthenticated = jest.fn();
+  const mockSetLocalStorageAuthEmpty = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup useAuth mock to return setAuth function
+    mockUseAuth.mockReturnValue({
+      auth: {},
+      setAuth: mockSetAuth,
+      isAuthenticated: mockIsAuthenticated,
+      setLocalStorageAuthEmpty: mockSetLocalStorageAuthEmpty,
+    });
   });
 
+  const renderLogin = () => {
+    return render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>
+    );
+  };
+  
   const fillForm = async (email: string, password: string) => {
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/email/i), email);
@@ -37,7 +54,7 @@ describe('Login component', () => {
   };
 
   test('Login_shows_required_errors_on_empty_submit', async () => {
-    render(<Login />);
+    renderLogin();
     const user = userEvent.setup();
 
     await user.click(screen.getByRole('button', { name: /sign in/i }));
@@ -47,7 +64,7 @@ describe('Login component', () => {
   });
 
   test('Login_shows_invalid_email_message', async () => {
-    render(<Login />);
+    renderLogin();
     await fillForm('invalid-email', '12345678');
 
     expect(
@@ -56,7 +73,7 @@ describe('Login component', () => {
   });
 
   test('Login_shows_min_length_password_message', async () => {
-    render(<Login />);
+    renderLogin();
     await fillForm('user@example.com', 'short');
 
     expect(
@@ -65,51 +82,51 @@ describe('Login component', () => {
   });
 
   test('Login_success_calls_toaster_with_message_and_sets_auth', async () => {
-    (loginUser as jest.Mock).mockResolvedValueOnce({
+    mockLoginUser.mockResolvedValueOnce({
       status: 200,
       data: { message: 'Welcome back!', token: 't-123' },
-    });
+    } as any);
 
-    render(<Login />);
+    renderLogin();
     await fillForm('user@example.com', 'verysecurepassword');
 
     await waitFor(() => {
-      expect(loginUser).toHaveBeenCalledWith({
+      expect(mockLoginUser).toHaveBeenCalledWith({
         email: 'user@example.com',
         password: 'verysecurepassword',
       });
     });
 
-    expect(toaster).toHaveBeenCalledWith(200, 'Welcome back!');
-    expect(setAuthMock).toHaveBeenCalledWith({ message: 'Welcome back!', token: 't-123' });
+    expect(mockToaster).toHaveBeenCalledWith(200, 'Welcome back!');
+    expect(mockSetAuth).toHaveBeenCalledWith({ message: 'Welcome back!', token: 't-123' });
     // Root error should not be present
     expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
   });
 
   test('Login_success_uses_default_message_when_missing', async () => {
-    (loginUser as jest.Mock).mockResolvedValueOnce({
+    mockLoginUser.mockResolvedValueOnce({
       status: 201,
       data: {}, // no message in payload
-    });
+    } as any);
 
-    render(<Login />);
+    renderLogin();
     await fillForm('user@example.com', 'verysecurepassword');
 
     await waitFor(() => {
-      expect(loginUser).toHaveBeenCalled();
+      expect(mockLoginUser).toHaveBeenCalled();
     });
-    expect(toaster).toHaveBeenCalledWith(201, 'Login successful');
-    expect(setAuthMock).toHaveBeenCalledWith({});
+    expect(mockToaster).toHaveBeenCalledWith(201, 'Login successful');
+    expect(mockSetAuth).toHaveBeenCalledWith({});
   });
 
   test('Login_failure_displays_root_error', async () => {
-    (loginUser as jest.Mock).mockRejectedValueOnce(new Error('Network down'));
+    mockLoginUser.mockRejectedValueOnce(new Error('Network down'));
 
-    render(<Login />);
+    renderLogin();
     await fillForm('user@example.com', 'verysecurepassword');
 
     expect(await screen.findByText('Network down')).toBeInTheDocument();
-    expect(toaster).not.toHaveBeenCalled();
-    expect(setAuthMock).not.toHaveBeenCalled();
+    expect(mockToaster).not.toHaveBeenCalled();
+    expect(mockSetAuth).not.toHaveBeenCalled();
   });
 });
