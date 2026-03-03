@@ -1,9 +1,12 @@
 import { AxiosError } from 'axios';
+import { PRODUCTS_CONSTANTS } from 'constants/productsConstants';
+import { parse } from 'path';
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from 'service/authService';
 import { IProductResponse } from 'types/IProductResponse';
 import { parsedError } from 'util/errorHandler';
+
 
 function Products() {
 
@@ -23,22 +26,27 @@ function Products() {
 
   async function fetchProductDetails(id:string){
     try {
+
+      setIsLoading(true);
+      setError(null);
       const response = await getProductById(id);
       setProduct(response.data || null);
+      setIsLoading(false);
 
     } catch (error) {
-
+      setIsLoading(false);
       setApiError(undefined);
       const parsed = parsedError(error);
-      if(parsed.message){
+      if(parsed && parsed.message){
         setApiError(parsed.message)
+        setError(parsed.message);
       }
       
     }
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    navigate(PRODUCTS_CONSTANTS.ROUTES.DASHBOARD);
   };
 
   if(isLoading) {
@@ -46,9 +54,9 @@ function Products() {
       <div className="container-fluid py-4">
         <div className="text-center">
           <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden">{PRODUCTS_CONSTANTS.ACCESSIBILITY.LOADING_STATUS}</span>
           </div>
-          <div className="mt-2">Loading product details...</div>
+          <div className="mt-2">{PRODUCTS_CONSTANTS.MESSAGES.LOADING}</div>
         </div>
       </div>
     );
@@ -66,7 +74,7 @@ function Products() {
             className="btn btn-outline-danger btn-sm mt-2" 
             onClick={() => fetchProductDetails(id!)}
           >
-            Try Again
+            {PRODUCTS_CONSTANTS.MESSAGES.TRY_AGAIN}
           </button>
         </div>
       </div>
@@ -77,9 +85,9 @@ function Products() {
     return (
       <div className="container-fluid py-4">
         <div className="text-center">
-          <h4 className="text-muted">Product not found</h4>
+          <h4 className="text-muted">{PRODUCTS_CONSTANTS.MESSAGES.PRODUCT_NOT_FOUND}</h4>
           <button className="btn btn-primary mt-3" onClick={handleBackToDashboard}>
-            Back to Dashboard
+            {PRODUCTS_CONSTANTS.LABELS.BACK_TO_DASHBOARD}
           </button>
         </div>
       </div>
@@ -96,9 +104,9 @@ function Products() {
               onClick={handleBackToDashboard}
             >
               <i className="bi bi-arrow-left me-2"></i>
-              Back to Dashboard
+              {PRODUCTS_CONSTANTS.LABELS.BACK_TO_DASHBOARD}
             </button>
-            <h1 className="h3 mb-0">Product Details</h1>
+            <h1 className="h3 mb-0">{PRODUCTS_CONSTANTS.LABELS.PRODUCT_DETAILS}</h1>
           </div>
 
           <div className="row">
@@ -119,23 +127,23 @@ function Products() {
               <div className="card h-100">
                 <div className="card-body">
                   <div className="mb-3">
-                    <h5>Product Title</h5>
+                    <h5>{PRODUCTS_CONSTANTS.LABELS.PRODUCT_TITLE}</h5>
                     <h2 className="card-title">{product.title}</h2>
                   </div>
 
                    <div className="mb-3">
-                    <h5>Product price</h5>
+                    <h5>{PRODUCTS_CONSTANTS.LABELS.PRODUCT_PRICE}</h5>
                     <h3 className="text-primary mb-3">${product.price}</h3>
                   </div>
                   
                   <div className="mb-4">
-                    <h5>Description</h5>
+                    <h5>{PRODUCTS_CONSTANTS.LABELS.DESCRIPTION}</h5>
                     <p className="text-muted">{product.productDesc}</p>
                   </div>
 
                   <div className="mb-3">
                     <small className="text-muted">
-                      Product ID: {product.id}
+                      {PRODUCTS_CONSTANTS.LABELS.PRODUCT_ID}: {product.id}
                     </small>
                   </div>
 
