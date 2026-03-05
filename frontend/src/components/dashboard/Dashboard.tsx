@@ -17,7 +17,7 @@ function Dashboard() {
 
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { register, formState: { errors, isSubmitting }, clearErrors, handleSubmit, setError, reset } = useForm<IProduct>()
+  const { register, formState: { errors, isSubmitting }, clearErrors, handleSubmit, setError, reset, setValue } = useForm<IProduct>()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [products, setProducts] = useState<IProductResponse[]>([])
   const [apiError, setApiError] = useState<string | undefined>(undefined);
@@ -78,6 +78,10 @@ function Dashboard() {
       if(parsed.message){
         setModalApiError(parsed.message)
       }
+
+      if(parsed.message){
+        setApiError(parsed.message)
+      }
     }
   }
 
@@ -89,6 +93,9 @@ function Dashboard() {
     if (file) {
       // Validate file type
       if (!DASHBOARD_CONSTANTS.CONFIG.FILE_UPLOAD.ALLOWED_TYPES.includes(file.type)) {
+        event.target.value = '';
+        setValue('file', [] as unknown as File[]);
+        setSelectedFile(null);
         setError('file', {
           message: DASHBOARD_CONSTANTS.MESSAGES.ERROR.INVALID_FILE_TYPE
         })
@@ -97,6 +104,9 @@ function Dashboard() {
 
       // Validate file size (5MB limit)
       if (file.size > DASHBOARD_CONSTANTS.CONFIG.FILE_UPLOAD.MAX_SIZE) {
+        event.target.value = '';
+        setValue('file', [] as unknown as File[]);
+        setSelectedFile(null);
         setError('file', {
           message: DASHBOARD_CONSTANTS.MESSAGES.ERROR.FILE_SIZE_LIMIT
         })
@@ -214,6 +224,9 @@ function Dashboard() {
               <ApiError message={modalApiError}/>
             </div>
               
+            <div className='mb-3'>
++              <ApiError message={apiError} />
++            </div>
 
             <Modal isOpen={isModalOpen} onHide={handleCloseModal}>
               <Modal.Header>
