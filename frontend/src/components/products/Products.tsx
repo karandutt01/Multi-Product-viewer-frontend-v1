@@ -1,10 +1,9 @@
 import { AxiosError } from 'axios';
 import { PRODUCTS_CONSTANTS } from 'constants/productsConstants';
-import { parse } from 'path';
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from 'service/authService';
-import { IProductResponse } from 'types/IProductResponse';
+import type { IProductResponse } from 'types/IProductResponse';
 import { parsedError } from 'util/errorHandler';
 
 
@@ -43,11 +42,11 @@ function Products() {
       }
       
     }
-  };
+  }
 
   const handleBackToDashboard = () => {
     navigate(PRODUCTS_CONSTANTS.ROUTES.DASHBOARD);
-  };
+  }
 
   if(isLoading) {
     return (

@@ -34,6 +34,16 @@ function Register() {
       setApiError(undefined);
       const parsed = parsedError(error);
 
+      // CHANGE: Handle field-specific errors from server
+      if (parsed?.fieldErrors) {
+        Object.entries(parsed.fieldErrors).forEach(([field, message]) => {
+          setError(field as keyof IRegisterForm, {
+            type: 'server',
+            message,
+          });
+        });
+      }
+
       // Global error
       if (parsed && parsed.message) {
         setApiError(parsed.message);

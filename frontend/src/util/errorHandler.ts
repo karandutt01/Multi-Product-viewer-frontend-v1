@@ -7,7 +7,7 @@ import { ERROR_CONSTANTS } from "constants/errorConstant";
 
 export const parsedError = (error: any): ParsedError => {
   const parsed: ParsedError = {}
-  if(error?.response?.data?.errors){
+  if(Array.isArray(error?.response?.data?.errors)){
      parsed.fieldErrors = {};
     error.response.data.errors.forEach((err: any) => {
       if (err.field && err.message) {

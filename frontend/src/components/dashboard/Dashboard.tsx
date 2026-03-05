@@ -4,7 +4,6 @@ import Modal from "components/shared/Modal";
 import { useForm } from "react-hook-form";
 import { addProduct, productList } from "service/authService";
 import toaster from "util/toaster";
-import { AxiosError } from "axios";
 import type { IProduct } from "../../types/IProduct";
 import type { IProductResponse } from "../../types/IProductResponse";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +45,6 @@ function Dashboard() {
     try {
       
       const uploadData = new FormData()
-      
       uploadData.append('title', formData.title)
       uploadData.append('price', formData.price)
       uploadData.append('productDesc', formData.description)
@@ -54,7 +52,6 @@ function Dashboard() {
       if (formData.file && formData.file.length > 0) {
         uploadData.append('image', formData.file[0])
       }
-
       const response = await addProduct(uploadData)
       if (response && response.data) {
         toaster(response.status, response?.data?.message || DASHBOARD_CONSTANTS.MESSAGES.SUCCESS)
@@ -65,6 +62,17 @@ function Dashboard() {
     } catch (error) {
       setApiError(undefined);
       const parsed =  parsedError(error)
+     // CHANGE: Handle field-specific errors from server
+      if (parsed?.fieldErrors) {
+        Object.entries(parsed.fieldErrors).forEach(([field, message]) => {
+          setError(field as keyof IProduct, {
+            type: 'server',
+            message,
+          });
+        });
+      }
+
+      // Global error
       if(parsed.message){
         setApiError(parsed.message)
       }
@@ -204,13 +212,13 @@ function Dashboard() {
             </div>
               
 
-            <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+            <Modal isOpen={isModalOpen} onHide={handleCloseModal}>
               <Modal.Header>
                 {DASHBOARD_CONSTANTS.LABELS.ADD_PRODUCT}
               </Modal.Header>
 
               <Modal.Body>
-                <form>
+                <form onSubmit={handleSubmit(addProductHandler)}>
                   <div className="p-3 dark-card">
                     <div>
                       <div className="mb-3">

@@ -18,7 +18,7 @@ function SharedOffCanvas({placement, name, show, handleClose, navigationItems}:{
   }
 
   return (
-    <Offcanvas show={show} placement={placement} onClose={handleClose}>
+    <Offcanvas show={show} placement={placement} onHide={handleClose}>
         <Offcanvas.Header>
           <Offcanvas.Title>{name}</Offcanvas.Title>
         </Offcanvas.Header>

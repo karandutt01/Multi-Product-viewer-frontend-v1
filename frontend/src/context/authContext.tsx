@@ -48,7 +48,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if(!auth.token) return false;
 
     try {
-      const tokenPayload = JSON.parse(atob(auth.token.split('.')[1]));
+      
+      const payload = auth.token.split('.')[1];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const tokenPayload = JSON.parse(atob(padded));
       const currentTime = Math.floor(Date.now() / 1000);
 
       if(tokenPayload.exp && tokenPayload.exp < currentTime){

@@ -27,13 +27,25 @@ function Login() {
       if (response && response.data) {
         toaster(response.status, response?.data?.message || LOGIN_CONSTANTS.SUCCESS.LOGIN_DEFAULT)
         setAuth(response.data);
-        navigate(LOGIN_CONSTANTS.ROUTES.DASHBOARD);
+        const redirectTo = location.state?.from?.pathname || LOGIN_CONSTANTS.ROUTES.DASHBOARD;
+       navigate(redirectTo, { replace: true });
       }
 
     } catch (error: unknown) {
       setApiError(undefined);
       const parsed = parsedError(error)
-      if(parsed && parsed.message){
+     // CHANGE: Handle field-specific errors from server
+      if (parsed?.fieldErrors) {
+        Object.entries(parsed.fieldErrors).forEach(([field, message]) => {
+          setError(field as keyof ILogin, {
+            type: 'server',
+            message,
+          });
+        });
+      }
+
+      // Global error
+      if (parsed && parsed.message) {
         setApiError(parsed.message);
       }
     }

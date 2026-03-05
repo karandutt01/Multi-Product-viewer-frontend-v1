@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api";
+
 const axiosConfig = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,7 +19,7 @@ axiosConfig.interceptors.request.use(
       try {
         const parsedData = JSON.parse(authData);
         if (parsedData.token) {
-          config.headers.Authorization = `Bearer ${parsedData.token}`
+          config.headers.Authorization = `Bearer ${String(parsedData.token)}`
         }
       } catch (error) {
         localStorage.removeItem('auth');
