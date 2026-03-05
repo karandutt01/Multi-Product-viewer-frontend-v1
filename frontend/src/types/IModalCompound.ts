@@ -1,4 +1,4 @@
-import { ModalProps } from "react-bootstrap";
+import { ModalProps } from "./ModalProps";
 
 export interface ModalCompound extends React.FC<ModalProps> {
   Header: React.FC<{ children: React.ReactNode }>;

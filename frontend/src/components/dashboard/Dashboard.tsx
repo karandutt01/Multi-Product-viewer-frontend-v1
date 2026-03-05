@@ -21,6 +21,7 @@ function Dashboard() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [products, setProducts] = useState<IProductResponse[]>([])
   const [apiError, setApiError] = useState<string | undefined>(undefined);
+  const [modalApiError, setModalApiError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     fetchProducts();
@@ -54,13 +55,14 @@ function Dashboard() {
       }
       const response = await addProduct(uploadData)
       if (response && response.data) {
-        toaster(response.status, response?.data?.message || DASHBOARD_CONSTANTS.MESSAGES.SUCCESS)
+        toaster(response.status, response?.data?.message || DASHBOARD_CONSTANTS.MESSAGES.SUCCESS.PRODUCT_ADDED)
         handleCloseModal()
         fetchProducts();
       }
 
     } catch (error) {
       setApiError(undefined);
+      setModalApiError(undefined);
       const parsed =  parsedError(error)
      // CHANGE: Handle field-specific errors from server
       if (parsed?.fieldErrors) {
@@ -70,6 +72,11 @@ function Dashboard() {
             message,
           });
         });
+      }
+
+      // CHANGE: Set error for modal context instead of page context
+      if(parsed.message){
+        setModalApiError(parsed.message)
       }
 
       // Global error
@@ -111,6 +118,7 @@ function Dashboard() {
 
   function handleCloseModal(){
     setIsModalOpen(false)
+    setModalApiError(undefined);
     reset();
   }
 

@@ -13,14 +13,18 @@ function Products() {
   const navigate = useNavigate()
   const [product, setProduct] = useState<IProductResponse | null>(null);
   const [apiError, setApiError] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
 
   useEffect(() => {
-    if (id) {
-      fetchProductDetails(id);
+   if (!id) {
+      setProduct(null);
+      setError(null);
+      setIsLoading(false);
+      return;
     }
+    fetchProductDetails(id);
   },[id])
 
   async function fetchProductDetails(id:string){
