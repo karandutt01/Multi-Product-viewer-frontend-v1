@@ -78,11 +78,6 @@ function Dashboard() {
       if(parsed.message){
         setModalApiError(parsed.message)
       }
-
-      // Global error
-      if(parsed.message){
-        setApiError(parsed.message)
-      }
     }
   }
 
@@ -216,7 +211,7 @@ function Dashboard() {
             }
 
             <div className='mb-3'>
-              <ApiError message={apiError}/>
+              <ApiError message={modalApiError}/>
             </div>
               
 

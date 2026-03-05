@@ -1,3 +1,4 @@
+import React from "react";
 import { ModalProps } from "./ModalProps";
 
 export interface ModalCompound extends React.FC<ModalProps> {
