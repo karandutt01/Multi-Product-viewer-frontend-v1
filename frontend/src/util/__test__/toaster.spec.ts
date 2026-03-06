@@ -24,6 +24,59 @@ describe('toaster utility', () => {
     jest.clearAllMocks();
   });
 
+  // Test cases to cover the specific lines in coverage report
+  describe('isSuccess evaluation and notify function assignment', () => {
+    it('should set isSuccess to true and use toast.success for status 200', () => {
+      toaster(200, 'Success message');
+      
+      // Verify that toast.success is called (covering notify assignment)
+      expect(toast.success).toHaveBeenCalledWith('Success message', expect.objectContaining(defaultOptions));
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('should set isSuccess to true and use toast.success for status 201', () => {
+      toaster(201, 'Created successfully');
+      
+      // Verify that toast.success is called (covering notify assignment)
+      expect(toast.success).toHaveBeenCalledWith('Created successfully', expect.objectContaining(defaultOptions));
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('should set isSuccess to false and use toast.error for status 400', () => {
+      toaster(400, 'Bad request');
+      
+      // Verify that toast.error is called (covering notify assignment)
+      expect(toast.error).toHaveBeenCalledWith('Bad request', expect.objectContaining(defaultOptions));
+      expect(toast.success).not.toHaveBeenCalled();
+    });
+
+    it('should set isSuccess to false and use toast.error for status 500', () => {
+      toaster(500, 'Server error');
+      
+      // Verify that toast.error is called (covering notify assignment)
+      expect(toast.error).toHaveBeenCalledWith('Server error', expect.objectContaining(defaultOptions));
+      expect(toast.success).not.toHaveBeenCalled();
+    });
+
+    it('should call notify function with correct message and options for success', () => {
+      const testMessage = 'Operation completed';
+      toaster(200, testMessage);
+      
+      // Verify notify function call with exact parameters
+      expect(toast.success).toHaveBeenCalledWith(testMessage, defaultOptions);
+      expect(toast.success).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call notify function with correct message and options for error', () => {
+      const testMessage = 'Operation failed';
+      toaster(404, testMessage);
+      
+      // Verify notify function call with exact parameters
+      expect(toast.error).toHaveBeenCalledWith(testMessage, defaultOptions);
+      expect(toast.error).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // Success scenarios
   it('calls toast.success for status 200', () => {
     toaster(200, 'Success message');

@@ -10,7 +10,7 @@ export const parsedError = (error: any): ParsedError => {
   if(Array.isArray(error?.response?.data?.errors)){
      parsed.fieldErrors = {};
     error.response.data.errors.forEach((err: any) => {
-      if (err.field && err.message) {
+      if (err && err.field && err.message) {
         parsed.fieldErrors![err.field] = err.message;
       }
     });

@@ -10,7 +10,37 @@ jest.mock('constants/errorConstant', () => ({
 
 describe('Error Handler', () => {
   describe('parsedError', () => {
-    test('should_parse_field_errors_from_response_data', () => {
+    test('should_initialize_empty_parsed_object', () => {
+      const error = {};
+
+      const result = parsedError(error);
+
+      expect(result).toBeDefined();
+      expect(typeof result).toBe('object');
+      expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
+    });
+
+    test('should_initialize_fieldErrors_when_errors_array_exists', () => {
+      const error = {
+        response: {
+          data: {
+            errors: [
+              { field: 'email', message: 'Email is required' }
+            ]
+          }
+        }
+      };
+
+      const result = parsedError(error);
+
+      expect(result.fieldErrors).toBeDefined();
+      expect(typeof result.fieldErrors).toBe('object');
+      expect(result.fieldErrors).toEqual({
+        email: 'Email is required'
+      });
+    });
+
+    test('should_process_errors_array_and_populate_fieldErrors', () => {
       const error = {
         response: {
           data: {
@@ -30,36 +60,117 @@ describe('Error Handler', () => {
       });
     });
 
-    test('should_extract_message_from_response_data', () => {
+    test('should_skip_invalid_error_objects_in_array', () => {
       const error = {
         response: {
           data: {
-            message: 'Authentication failed'
+            errors: [
+              { field: 'email' }, // Missing message
+              { message: 'Invalid format' }, // Missing field
+              { field: 'phone', message: 'Invalid phone number' }, // Valid
+              { field: '', message: 'Empty field' }, // Empty field
+              { field: 'name', message: '' } // Empty message
+            ]
           }
         }
       };
 
       const result = parsedError(error);
 
-      expect(result.message).toBe('Authentication failed');
-      expect(result.fieldErrors).toBeUndefined();
+      expect(result.fieldErrors).toEqual({
+        phone: 'Invalid phone number'
+      });
     });
 
-    test('should_extract_message_from_error_object', () => {
+    test('should_handle_empty_errors_array', () => {
       const error = {
-        message: 'Network connection failed'
+        response: {
+          data: {
+            errors: [],
+            message: 'No specific field errors'
+          }
+        }
+      };
+
+      const result = parsedError(error);
+
+      expect(result.fieldErrors).toEqual({});
+      expect(result.message).toBe('No specific field errors');
+    });
+
+    test('should_not_initialize_fieldErrors_when_errors_is_not_array', () => {
+      const error = {
+        response: {
+          data: {
+            errors: 'not an array',
+            message: 'Some error'
+          }
+        }
+      };
+
+      const result = parsedError(error);
+
+      expect(result.fieldErrors).toBeUndefined();
+      expect(result.message).toBe('Some error');
+    });
+
+    test('should_prioritize_response_data_message', () => {
+      const error = {
+        message: 'Generic error message',
+        response: {
+          data: {
+            message: 'Specific API error message'
+          }
+        }
+      };
+
+      const result = parsedError(error);
+
+      expect(result.message).toBe('Specific API error message');
+    });
+
+    test('should_fallback_to_error_message_when_no_response_data_message', () => {
+      const error = {
+        message: 'Network connection failed',
+        response: {
+          data: {}
+        }
       };
 
       const result = parsedError(error);
 
       expect(result.message).toBe('Network connection failed');
-      expect(result.fieldErrors).toBeUndefined();
     });
 
-    test('should_return_fallback_message_when_no_message_available', () => {
+    test('should_use_fallback_message_when_no_message_available', () => {
+      const error = {
+        response: {
+          data: {}
+        }
+      };
+
+      const result = parsedError(error);
+
+      expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
+    });
+
+    test('should_use_fallback_message_for_empty_object', () => {
       const error = {};
 
       const result = parsedError(error);
+
+      expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
+    });
+
+    test('should_handle_null_error', () => {
+      const result = parsedError(null);
+
+      expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
+      expect(result.fieldErrors).toBeUndefined();
+    });
+
+    test('should_handle_undefined_error', () => {
+      const result = parsedError(undefined);
 
       expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
       expect(result.fieldErrors).toBeUndefined();
@@ -85,30 +196,14 @@ describe('Error Handler', () => {
       });
     });
 
-    test('should_handle_empty_errors_array', () => {
-      const error = {
-        response: {
-          data: {
-            errors: [],
-            message: 'No specific field errors'
-          }
-        }
-      };
-
-      const result = parsedError(error);
-
-      expect(result.message).toBe('No specific field errors');
-      expect(result.fieldErrors).toEqual({});
-    });
-
-    test('should_handle_malformed_field_error_objects', () => {
+    test('should_handle_multiple_errors_for_same_field', () => {
       const error = {
         response: {
           data: {
             errors: [
-              { field: 'email' }, // Missing message
-              { message: 'Invalid format' }, // Missing field
-              { field: 'phone', message: 'Invalid phone number' } // Valid
+              { field: 'password', message: 'Password is required' },
+              { field: 'email', message: 'Email is invalid' },
+              { field: 'password', message: 'Password must be strong' }
             ]
           }
         }
@@ -117,19 +212,21 @@ describe('Error Handler', () => {
       const result = parsedError(error);
 
       expect(result.fieldErrors).toEqual({
-        phone: 'Invalid phone number'
+        email: 'Email is invalid',
+        password: 'Password must be strong' // Last message wins
       });
     });
 
-    test('should_handle_null_or_undefined_error', () => {
-      const nullResult = parsedError(null);
-      const undefinedResult = parsedError(undefined);
+    test('should_handle_error_with_response_but_no_data', () => {
+      const error = {
+        response: {},
+        message: 'Fallback message'
+      };
 
-      expect(nullResult.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
-      expect(nullResult.fieldErrors).toBeUndefined();
+      const result = parsedError(error);
 
-      expect(undefinedResult.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
-      expect(undefinedResult.fieldErrors).toBeUndefined();
+      expect(result.message).toBe('Fallback message');
+      expect(result.fieldErrors).toBeUndefined();
     });
 
     test('should_handle_nested_error_structure', () => {
@@ -155,14 +252,15 @@ describe('Error Handler', () => {
       expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
     });
 
-    test('should_handle_multiple_errors_for_same_field', () => {
+    test('should_handle_errors_array_with_null_elements', () => {
       const error = {
         response: {
           data: {
             errors: [
-              { field: 'password', message: 'Password is required' },
-              { field: 'email', message: 'Email is invalid' },
-              { field: 'password', message: 'Password must be strong' }
+              null,
+              { field: 'email', message: 'Email is required' },
+              undefined,
+              { field: 'password', message: 'Password is required' }
             ]
           }
         }
@@ -171,44 +269,40 @@ describe('Error Handler', () => {
       const result = parsedError(error);
 
       expect(result.fieldErrors).toEqual({
-        email: 'Email is invalid',
-        password: 'Password must be strong' // Last message wins
+        email: 'Email is required',
+        password: 'Password is required'
       });
     });
 
-    test('should_prioritize_response_data_message_over_error_message', () => {
+    test('should_handle_errors_array_with_non_object_elements', () => {
       const error = {
-        message: 'Generic error message',
         response: {
           data: {
-            message: 'Specific API error message'
+            errors: [
+              'string error',
+              123,
+              { field: 'email', message: 'Email is required' },
+              true,
+              { field: 'password', message: 'Password is required' }
+            ]
           }
         }
       };
 
       const result = parsedError(error);
 
-      expect(result.message).toBe('Specific API error message');
+      expect(result.fieldErrors).toEqual({
+        email: 'Email is required',
+        password: 'Password is required'
+      });
     });
 
-    test('should_handle_error_with_response_but_no_data', () => {
-      const error = {
-        response: {},
-        message: 'Fallback message'
-      };
-
-      const result = parsedError(error);
-
-      expect(result.message).toBe('Fallback message');
-      expect(result.fieldErrors).toBeUndefined();
-    });
-
-    test('should_initialize_fieldErrors_when_errors_array_exists', () => {
+    test('should_handle_deeply_nested_missing_properties', () => {
       const error = {
         response: {
           data: {
             errors: [
-              { field: 'test', message: 'Test error' }
+              { field: 'email', message: 'Email is required' }
             ]
           }
         }
@@ -217,7 +311,40 @@ describe('Error Handler', () => {
       const result = parsedError(error);
 
       expect(result.fieldErrors).toBeDefined();
-      expect(typeof result.fieldErrors).toBe('object');
+      expect(result.fieldErrors!.email).toBe('Email is required');
+    });
+
+    test('should_handle_error_with_only_message_property', () => {
+      const error = {
+        message: 'Simple error message'
+      };
+
+      const result = parsedError(error);
+
+      expect(result.message).toBe('Simple error message');
+      expect(result.fieldErrors).toBeUndefined();
+    });
+
+    test('should_handle_error_with_empty_string_messages', () => {
+      const error = {
+        response: {
+          data: {
+            message: '',
+            errors: [
+              { field: 'email', message: '' },
+              { field: 'password', message: 'Password is required' }
+            ]
+          }
+        },
+        message: ''
+      };
+
+      const result = parsedError(error);
+
+      expect(result.message).toBe(ERROR_CONSTANTS.SOMETHING_WENT_WRONG);
+      expect(result.fieldErrors).toEqual({
+        password: 'Password is required'
+      });
     });
   });
 });

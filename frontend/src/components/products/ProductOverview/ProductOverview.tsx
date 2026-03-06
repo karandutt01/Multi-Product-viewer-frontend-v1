@@ -3,11 +3,13 @@ import { PRODUCTS_CONSTANTS } from 'constants/productsConstants';
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById } from 'service/authService';
-import type { IProductResponse } from 'types/IProductResponse';
+import type { IProductResponse } from '../../../types/IProduct';
 import { parsedError } from 'util/errorHandler';
+import ProductCard from '../ProductCard/ProductCard';
+import ProductDetailsInfo from '../ProductDetailsInfo/ProductDetailsInfo';
 
 
-function Products() {
+function ProductOverview() {
 
   const { id } = useParams<{id:string}>()
   const navigate = useNavigate()
@@ -109,50 +111,17 @@ function Products() {
               <i className="bi bi-arrow-left me-2"></i>
               {PRODUCTS_CONSTANTS.LABELS.BACK_TO_DASHBOARD}
             </button>
-            <h1 className="h3 mb-0">{PRODUCTS_CONSTANTS.LABELS.PRODUCT_DETAILS}</h1>
+          </div>
+          <div>
+            <h1 className="h3 mb-3">{PRODUCTS_CONSTANTS.LABELS.PRODUCT_DETAILS}</h1>
           </div>
 
-          <div className="row">
-            <div className="col-md-6">
-              {product.imageUrl && (
-                <div className="card">
-                  <img 
-                    src={product.imageUrl} 
-                    className="card-img-top" 
-                    alt={product.title}
-                    style={{ height: '400px', objectFit: 'cover' }}
-                  />
-                </div>
-              )}
+          <div className="row g-4">
+            <div className="col-md-6 producDetailsWidth">
+              <ProductCard product={product} />
             </div>
             
-            <div className="col-md-6">
-              <div className="card h-100">
-                <div className="card-body">
-                  <div className="mb-3">
-                    <h5>{PRODUCTS_CONSTANTS.LABELS.PRODUCT_TITLE}</h5>
-                    <h2 className="card-title">{product.title}</h2>
-                  </div>
-
-                   <div className="mb-3">
-                    <h5>{PRODUCTS_CONSTANTS.LABELS.PRODUCT_PRICE}</h5>
-                    <h3 className="text-primary mb-3">${product.price}</h3>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <h5>{PRODUCTS_CONSTANTS.LABELS.DESCRIPTION}</h5>
-                    <p className="text-muted">{product.productDesc}</p>
-                  </div>
-
-                  <div className="mb-3">
-                    <small className="text-muted">
-                      {PRODUCTS_CONSTANTS.LABELS.PRODUCT_ID}: {product.id}
-                    </small>
-                  </div>
-
-                </div>
-              </div>
-            </div>
+            <ProductDetailsInfo product={product} />
           </div>
         </div>
       </div>
@@ -160,4 +129,4 @@ function Products() {
   );
 }
 
-export default Products
+export default ProductOverview

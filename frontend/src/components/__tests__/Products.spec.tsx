@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Products from '../products/Products';
+import Products from '../products/ProductOverview/ProductOverview';
 import { getProductById } from '../../service/authService';
 import { parsedError } from '../../util/errorHandler';
 import { PRODUCTS_CONSTANTS } from '../../constants/productsConstants';
@@ -56,14 +56,18 @@ describe('Products Component', () => {
       expect(screen.queryByText(PRODUCTS_CONSTANTS.MESSAGES.LOADING)).not.toBeInTheDocument();
     });
 
-    // Check for Product Details heading
     expect(screen.getByText(PRODUCTS_CONSTANTS.LABELS.PRODUCT_DETAILS)).toBeInTheDocument();
 
-    // Check all product details are rendered
-    expect(screen.getByText('Test Product')).toBeInTheDocument();
-    expect(screen.getByText('$99.99')).toBeInTheDocument();
-    expect(screen.getByText('This is a test product description')).toBeInTheDocument();
-    expect(screen.getByText(`${PRODUCTS_CONSTANTS.LABELS.PRODUCT_ID}: 123`)).toBeInTheDocument();
+    const productElements = screen.getAllByText('Test Product');
+    expect(productElements).toHaveLength(2); 
+    
+    const priceElements = screen.getAllByText('$99.99');
+    expect(priceElements).toHaveLength(2);
+    
+    const productDesc = (screen.getAllByText('This is a test product description'));
+    expect(productDesc).toHaveLength(2);
+
+    expect(screen.getByText(`${PRODUCTS_CONSTANTS.LABELS.PRODUCT_ID}: 123`));
     
     // Check image is rendered
     const image = screen.getByAltText('Test Product');
@@ -204,7 +208,6 @@ describe('Products Component', () => {
     const image = screen.getByAltText('Test Product');
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', mockProduct.imageUrl);
-    expect(image).toHaveStyle({ height: '400px', objectFit: 'cover' });
   });
 
   test('should_not_render_image_when_url_missing', async () => {
