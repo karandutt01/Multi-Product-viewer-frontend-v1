@@ -34,7 +34,7 @@ function Dashboard() {
       setProducts(productData);
       setApiError(undefined);
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Failed to fetch products');
+      setApiError(error instanceof Error ? error.message : DASHBOARD_CONSTANTS.MESSAGES.ERROR.FETCH_PRODUCTS);
     }
   };
 
