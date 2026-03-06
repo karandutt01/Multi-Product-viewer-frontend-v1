@@ -46,12 +46,12 @@ function Dashboard() {
     try {
       
       const uploadData = new FormData()
-      uploadData.append('title', formData.title)
-      uploadData.append('price', formData.price)
-      uploadData.append('productDesc', formData.description)
+      uploadData.append(DASHBOARD_CONSTANTS.FORM_DATA_KEYS.TITLE, formData.title)
+      uploadData.append(DASHBOARD_CONSTANTS.FORM_DATA_KEYS.PRICE, formData.price)
+      uploadData.append(DASHBOARD_CONSTANTS.FORM_DATA_KEYS.PRODUCT_DESC, formData.description)
       
       if (formData.file && formData.file.length > 0) {
-        uploadData.append('image', formData.file[0])
+        uploadData.append(DASHBOARD_CONSTANTS.FORM_DATA_KEYS.IMAGE, formData.file[0])
       }
       const response = await addProduct(uploadData)
       if (response && response.data) {

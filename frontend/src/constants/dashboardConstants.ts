@@ -11,6 +11,14 @@ export const DASHBOARD_CONSTANTS = {
     ADD_BUTTON: 'Create Product',
     CANCEL_BUTTON: 'Cancel'
   },
+
+  FORM_DATA_KEYS: {
+    TITLE: 'title',
+    PRICE: 'price',
+    PRODUCT_DESC: 'productDesc',
+    IMAGE: 'image'
+  },
+
   
   PLACEHOLDERS: {
     PRODUCT_TITLE: 'Enter product title',
