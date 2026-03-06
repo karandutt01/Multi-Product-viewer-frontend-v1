@@ -225,8 +225,8 @@ function Dashboard() {
             </div>
               
             <div className='mb-3'>
-+              <ApiError message={apiError} />
-+            </div>
+              <ApiError message={apiError} />
+            </div>
 
             <Modal isOpen={isModalOpen} onHide={handleCloseModal}>
               <Modal.Header>
