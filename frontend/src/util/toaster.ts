@@ -13,7 +13,7 @@ const toaster = (status:number, message:string) => {
     theme: "colored" as const,
   };
 
-  const isSuccess = status >= 200 && status < 300;
+  const isSuccess = status === 200 || status === 201;;
   const notify = isSuccess ? toast.success : toast.error;
   notify(message, options);
 }
