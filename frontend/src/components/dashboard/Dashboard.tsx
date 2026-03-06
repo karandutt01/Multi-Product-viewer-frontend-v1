@@ -250,7 +250,7 @@ function Dashboard() {
                       </div>
 
                        <div className="mb-3">
-                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.price.id} className="form-label">Price</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.price.id} className="form-label">{DASHBOARD_CONSTANTS.LABELS.PRICE}</label>
                         <input
                           placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.PRICE}
                           className="form-control"
@@ -262,7 +262,7 @@ function Dashboard() {
                       </div>
 
                       <div className="mb-3">
-                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.description.id} className="form-label">Product Description</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.description.id} className="form-label">{DASHBOARD_CONSTANTS.LABELS.PRODUCT_DESCRIPTION}</label>
                         <input
                           placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.DESCRIPTION}
                           className="form-control"
@@ -274,7 +274,7 @@ function Dashboard() {
                       </div>
 
                       <div className="mb-3">
-                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.file.id} className="form-label">Upload file</label>
+                        <label htmlFor={DASHBOARD_CONSTANTS.FORM_FIELDS.file.id} className="form-label">{DASHBOARD_CONSTANTS.LABELS.UPLOAD_FILE}</label>
                         <input
                           type="file"
                           placeholder={DASHBOARD_CONSTANTS.PLACEHOLDERS.FILE}
