@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './layout.scss';
 import SharedOffCanvas from '../shared/SharedOffCanvas';
+import { useNavigate } from 'react-router-dom';
+import useSessionGuard from 'hooks/useSessionGuard';
 
 
 function Layout({children}: {children: React.ReactNode}) {
+
+  useSessionGuard();
+  const navigate = useNavigate();
   const [show, setShow] = useState(false)
 
   function handleShow(){
@@ -21,6 +26,19 @@ function Layout({children}: {children: React.ReactNode}) {
     setShow(false);
   }
 
+  function handleLogout() {
+    localStorage.removeItem('auth');
+    localStorage.removeItem('activeSession');
+    navigate('/login');
+  }
+
+  function handleLogoutKeyDown(event: React.KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleLogout();
+    }
+  }
+
    const navigationItems = [
      {
       label: "Dashboard",
@@ -33,7 +51,7 @@ function Layout({children}: {children: React.ReactNode}) {
    <div className="layout-container">
       <nav className="navbar bg-dark">
         <div className="container-fluid row">
-          <div className="col-1">
+          <div className="d-flex justify-content-between align-items-center w-100">
             <div className="hamburger d-flex justify-content-center navbar-brand" 
               onClick={handleShow}
               onKeyDown={handleKeyDown}
@@ -43,6 +61,18 @@ function Layout({children}: {children: React.ReactNode}) {
               aria-expanded={show}
               >
               <i className="bi bi-list text-white"></i>
+            </div>
+
+            <div className="navbar-nav">
+              <button
+                className="btn btn-outline-light btn-sm d-flex align-items-center"
+                onClick={handleLogout}
+                onKeyDown={handleLogoutKeyDown}
+                aria-label="Logout from application"
+                type="button">
+                <i className="bi bi-box-arrow-right me-2"></i>
+                <span className="d-none d-md-inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
