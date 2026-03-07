@@ -25,10 +25,12 @@ function Login() {
     try {
       const response = await loginUser(formData)
       if (response && response.data) {
-        toaster(response.status, response?.data?.message || LOGIN_CONSTANTS.SUCCESS.LOGIN_DEFAULT)
+        const sessionId = Date.now().toString();
+        localStorage.setItem("activeSession", sessionId);
         setAuth(response.data);
         const redirectTo = location.state?.from?.pathname || LOGIN_CONSTANTS.ROUTES.DASHBOARD;
-       navigate(redirectTo, { replace: true });
+        toaster(response.status, response?.data?.message || LOGIN_CONSTANTS.SUCCESS.LOGIN_DEFAULT)
+        navigate(redirectTo, { replace: true });
       }
 
     } catch (error: unknown) {
