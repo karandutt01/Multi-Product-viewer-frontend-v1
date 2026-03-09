@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if(auth.token){
         localStorage.setItem('auth', JSON.stringify(auth));
       }else{
-        localStorage.setItem('auth', JSON.stringify(auth));
+        localStorage.removeItem('auth');
       }
     }
   }, [auth, isInitialized])

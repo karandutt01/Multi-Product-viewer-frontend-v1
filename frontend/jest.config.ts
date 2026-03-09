@@ -34,12 +34,12 @@ const config: Config.InitialOptions = {
   resetMocks: true,
   clearMocks: true,
   
-  // CHANGE: Removed service exclusion and simplified patterns
+  // CHANGE: Updated to exclude index.tsx and reportWebVitals.ts specifically
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/index.tsx',
-    '!src/reportWebVitals.ts',
+    '!src/index.tsx', // CHANGE: Exclude index.tsx
+    '!src/reportWebVitals.ts', // CHANGE: Exclude reportWebVitals.ts
     '!src/serviceWorker.ts',
     '!src/setupTests.ts',
     '!src/**/__tests__/**',
