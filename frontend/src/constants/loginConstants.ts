@@ -4,7 +4,8 @@ export const LOGIN_CONSTANTS = {
     TITLE: "Sign in with email",
     EMAIL: "Email",
     PASSWORD: "Password",
-    SUBMIT_BUTTON: "Sign In"
+    SUBMIT_BUTTON: "Sign In",
+    LOGOUT:"Logout"
   },
 
   // Placeholders

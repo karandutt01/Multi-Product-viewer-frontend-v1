@@ -30,7 +30,7 @@ function Layout({children}: {children: React.ReactNode}) {
   function handleLogout() {
     localStorage.removeItem('auth');
     localStorage.removeItem('activeSession');
-    navigate(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
+    navigate(`${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
   }
 
   function handleLogoutKeyDown(event: React.KeyboardEvent) {
@@ -72,7 +72,7 @@ function Layout({children}: {children: React.ReactNode}) {
                 aria-label="Logout from application"
                 type="button">
                 <i className="bi bi-box-arrow-right me-2"></i>
-                <span className="d-none d-md-inline">Logout</span>
+                <span className="d-none d-md-inline">{LOGIN_CONSTANTS.LABELS.LOGOUT}</span>
               </button>
             </div>
           </div>

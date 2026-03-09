@@ -17,7 +17,7 @@ export default function useSessionGuard() {
         const newSession = event.newValue;
         if (sessionRef.current && newSession !== sessionRef.current) {
           localStorage.removeItem("auth");
-          navigate(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`, { replace: true });
+          navigate(`${LOGIN_CONSTANTS.ROUTES.LOGIN}`, { replace: true });
         }
       }
     };
