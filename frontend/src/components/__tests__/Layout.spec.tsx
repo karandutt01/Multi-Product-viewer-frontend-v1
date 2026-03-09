@@ -193,7 +193,7 @@ describe('Layout Component', () => {
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('activeSession');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledTimes(2);
-      expect(mockNavigate).toHaveBeenCalledWith(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
     });
 
     test('should handle multiple logout calls safely', () => {
@@ -224,7 +224,7 @@ describe('Layout Component', () => {
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('activeSession');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledTimes(2);
-      expect(mockNavigate).toHaveBeenCalledWith(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
     });
 
     test('should trigger logout on Space key press', () => {
@@ -240,7 +240,7 @@ describe('Layout Component', () => {
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('activeSession');
       expect(mockLocalStorage.removeItem).toHaveBeenCalledTimes(2);
-      expect(mockNavigate).toHaveBeenCalledWith(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
+      expect(mockNavigate).toHaveBeenCalledWith(`${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
     });
 
     test('should not trigger logout on other key presses', () => {
