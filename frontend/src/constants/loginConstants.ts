@@ -40,7 +40,8 @@ export const LOGIN_CONSTANTS = {
 
   // Routes
   ROUTES: {
-    DASHBOARD: "/dashboard"
+    DASHBOARD: "/dashboard",
+    LOGIN:"/login"
   }
 } as const;
 

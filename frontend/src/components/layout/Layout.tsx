@@ -3,6 +3,7 @@ import './layout.scss';
 import SharedOffCanvas from '../shared/SharedOffCanvas';
 import { useNavigate } from 'react-router-dom';
 import useSessionGuard from 'hooks/useSessionGuard';
+import { LOGIN_CONSTANTS } from 'constants/loginConstants';
 
 
 function Layout({children}: {children: React.ReactNode}) {
@@ -29,7 +30,7 @@ function Layout({children}: {children: React.ReactNode}) {
   function handleLogout() {
     localStorage.removeItem('auth');
     localStorage.removeItem('activeSession');
-    navigate('/login');
+    navigate(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`);
   }
 
   function handleLogoutKeyDown(event: React.KeyboardEvent) {
