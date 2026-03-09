@@ -1,3 +1,4 @@
+import { LOGIN_CONSTANTS } from "constants/loginConstants";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +17,7 @@ export default function useSessionGuard() {
         const newSession = event.newValue;
         if (sessionRef.current && newSession !== sessionRef.current) {
           localStorage.removeItem("auth");
-          navigate("/login", { replace: true });
+          navigate(`/${LOGIN_CONSTANTS.ROUTES.LOGIN}`, { replace: true });
         }
       }
     };
